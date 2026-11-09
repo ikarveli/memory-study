@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Memory Study</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:#f3f5f8;--ink:#10141b;--mut:#6a7383;--acc:#2f4cf5;--face:#fff;--line:#dde2ea}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1016;--ink:#e9ecf2;--mut:#8b94a5;--acc:#5b7bff;--face:#1a1f29;--line:#2a303c}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}
+.top{display:flex;justify-content:space-between;padding:18px 24px;color:var(--mut);font-size:.9rem}
+main{max-width:600px;margin:0 auto;padding:0 20px 60px;text-align:center}
+h2{font-size:2rem;font-weight:500;letter-spacing:-.02em;line-height:1.15;margin:.2em 0 .3em}
+p{margin:.6em auto;max-width:34ch}
+.mut{color:var(--mut)}.err{color:#d6455d;min-height:1.5em}
+.hide{display:none!important}
+section{animation:fade .5s ease both}
+@keyframes fade{from{opacity:0}}
+.btn{font:inherit;font-weight:500;color:#fff;background:var(--acc);border:0;border-radius:999px;padding:14px 34px;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 12px 24px -12px var(--acc);transition:transform .2s,border-radius .4s}
+.btn:hover{transform:translateY(-2px);border-radius:22px}
+.btn:active{transform:scale(.97)}
+.btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+input{font:inherit;font-size:1.6rem;text-align:center;width:min(100%,260px);padding:8px 4px;border:0;border-bottom:2px solid var(--line);border-radius:0;background:transparent;color:var(--ink);letter-spacing:.12em;outline:0;transition:border-color .2s}
+input:focus{border-color:var(--acc)}
+#pid{text-transform:uppercase}
+p:has(>input){margin:1.8em auto 1.4em}
+/* liquid orb: four circles merged by an SVG "goo" filter */
+.stage{position:relative;width:min(62vw,250px);aspect-ratio:1;margin:3vh auto 2vh}
+.liquid{position:absolute;inset:0;filter:url(#goo)}
+.liquid i{position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--acc),#fff 40%),var(--acc) 60%)}
+.liquid i:nth-child(1){inset:15%;animation:breathe 7s ease-in-out infinite}
+.liquid i:nth-child(2){width:26%;height:26%;left:12%;top:8%;animation:d1 9s ease-in-out infinite}
+.liquid i:nth-child(3){width:20%;height:20%;right:8%;top:32%;animation:d2 11s ease-in-out infinite}
+.liquid i:nth-child(4){width:16%;height:16%;left:36%;bottom:4%;animation:d3 8s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.05)}}
+@keyframes d1{50%{transform:translate(40%,50%) scale(.7)}}
+@keyframes d2{50%{transform:translate(-70%,-30%) scale(1.15)}}
+@keyframes d3{50%{transform:translate(30%,-80%) scale(.8)}}
+#dg{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:5.5rem;font-weight:300;font-variant-numeric:tabular-nums}
+#dg.sm{font-size:1.5rem;font-weight:400}
+#dg.pulse{animation:pop .35s ease-out}
+@keyframes pop{from{transform:scale(.8);opacity:.3}}
+.score{font-size:4rem;font-weight:300;line-height:1.1}
+/* game */
+.bar{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;font-weight:500}
+#tm{font-size:1.6rem;font-weight:300;font-variant-numeric:tabular-nums}
+.tbar{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin:10px 0 20px}
+.tbar i{display:block;height:100%;background:var(--acc);border-radius:6px;transform-origin:left;transition:transform .3s linear}
+.grid{display:grid;gap:9px;grid-template-columns:repeat(5,1fr);max-width:420px;margin:0 auto}
+@media(min-width:600px){.grid.l2{grid-template-columns:repeat(10,1fr);max-width:none;gap:7px}}
+.c{aspect-ratio:1;border:0;padding:0;border-radius:34%;color:var(--ink);font-family:inherit;font-weight:500;font-variant-numeric:tabular-nums;font-size:clamp(1.2rem,6vw,2rem);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.5),transparent 45%),var(--acc);
+  box-shadow:0 10px 16px -10px var(--acc),inset 0 -6px 10px rgba(0,0,30,.22);
+  transition:border-radius .45s,transform .3s,opacity .5s,filter .5s,background .2s}
+.grid.l2 .c{font-size:clamp(.95rem,3.4vw,1.5rem)}
+@media(hover:hover){.c:hover{border-radius:50%}}
+.c:active{transform:scale(.93)}
+.c:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.c.open{background:var(--face);border-radius:50%;box-shadow:inset 0 0 0 2px var(--acc)}
+.c.done{transform:scale(.15);opacity:0;filter:blur(8px);pointer-events:none}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><span>memory study</span><span id="sync"></span></header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur in="SourceGraphic" stdDeviation="9"/><feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10"/></filter></svg>
+<main>
+<div id="stage" class="stage"><div class="liquid" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div id="dg" role="status"></div></div>
+
+<section id="login" class="hide">
+  <h2>Welcome</h2>
+  <p class="mut">Enter your participant ID to begin.</p>
+  <p><input id="pid" autocomplete="off" aria-label="Participant ID"></p>
+  <p><button id="loginBtn" class="btn">Continue</button></p>
+  <p id="loginMsg" class="err"></p>
+</section>
+
+<section id="home" class="hide">
+  <div id="homeTxt"></div>
+  <p><button id="homeBtn" class="btn">Start</button></p>
+</section>
+
+<section id="digit" class="hide">
+  <div id="askBox" class="hide">
+    <p class="mut">Type the digits in the order you saw them.</p>
+    <p><input id="ans" inputmode="numeric" autocomplete="off" aria-label="Digits"></p>
+    <p><button id="ansBtn" class="btn">Submit</button></p>
+  </div>
+</section>
+
+<section id="game" class="hide">
+  <div class="bar"><span id="lv"></span><span id="tm"></span><span id="sc"></span></div>
+  <div class="tbar"><i id="tfill"></i></div>
+  <div id="grid" class="grid"></div>
+</section>
+</main>
+
+<script>
+// ===== CONFIG =====
+const ENDPOINT = "";          // paste your Apps Script web app URL here (leave empty for local test mode)
+const GAME_SECONDS = 300;
+const POST_DAY = 14;          // final memory test is due on this day (day 1 = the day the ID is first used)
+const MAX_LEN = 21;           // digit test ceiling (3,5,7,...,21)
+// ==================
+
+const KEY="memstudy_v2", P=new URLSearchParams(location.search), TEST=P.has("test");
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}};
+let active=false;   // becomes true only after an ID is entered on this page load
+let st=Object.assign({pid:"",group:"",enrolled:"",pre:false,post:false,days:[],queue:[],cfgPost:false},load());
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+function show(id){["login","home","digit","game"].forEach(x=>$(x).classList.toggle("hide",x!==id));$("stage").classList.toggle("hide",id==="game")}
+
+// ---------- sync ----------
+const HDR={
+  Participants:["timestamp","pid","group","enrolled_date"],
+  Logins:["timestamp","pid","group","date"],
+  Digit:["timestamp","pid","group","phase","span","trials","trial_detail"],
+  Game:["timestamp","pid","group","day_number","date",
+    "l1_pairs","l1_cards_opened","l1_score","l1_completed","l1_seconds","l1_seed",
+    "l2_pairs","l2_cards_opened","l2_score","l2_completed","l2_seconds","l2_seed","total_score"]
+};
+function send(sheet,row){
+  st.queue.push({sheet,hdr:HDR[sheet],row:[new Date().toISOString(),st.pid,st.group,...row]});
+  save();flush();
+}
+let flushing=false;
+async function flush(){
+  if(!ENDPOINT||flushing)return;
+  flushing=true;
+  while(st.queue.length){
+    try{
+      // text/plain avoids a CORS preflight; the response is opaque, so a resolved fetch counts as sent
+      await fetch(ENDPOINT,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify(st.queue[0])});
+      st.queue.shift();save();
+    }catch(e){break}
+  }
+  flushing=false;
+  $("sync").textContent=st.queue.length?"Saving is pending — keep this page open with internet.":"";
+}
+async function query(pid){
+  const c=new AbortController();setTimeout(()=>c.abort(),8000);
+  const r=await fetch(ENDPOINT+"?pid="+encodeURIComponent(pid),{signal:c.signal});
+  return await r.json();
+}
+function applyServer(r){
+  if(r.ok){
+    if(r.enrolled)st.enrolled=r.enrolled;
+    if(r.group)st.group=r.group;
+    st.pre=st.pre||!!r.preDone;st.post=st.post||!!r.postDone;
+    st.days=[...new Set([...st.days,...(r.days||[])])];
+  }
+  save();
+}
+async function getCfg(){
+  if(!ENDPOINT)return;
+  try{applyServer(await query(st.pid))}catch(e){/* keep last known state */}
+}
+
+// ---------- routing ----------
+const dayNum=()=>P.get("day")?+P.get("day"):Math.floor((new Date(today())-new Date(st.enrolled))/864e5)+1;
+async function route(){
+  if(!active){show("login");return}
+  await getCfg();flush();
+  const day=dayNum(),played=st.days.includes(today())&&!TEST,postDue=day>=POST_DAY&&!st.post;
+  let txt,btn,fn;
+  if(!st.pre){txt="<h2>Let's start with a memory test</h2><p class='mut'>You'll see digits one at a time, then type them back. It takes a few minutes. A card game follows.</p>";btn="Start memory test";fn=()=>digitTest("pre")}
+  else if(st.post){txt="<h2>All done</h2><p class='mut'>The study is complete. Thank you.</p>";btn=null}
+  else if(!played){
+    txt=postDue?`<h2>Day ${day}</h2><p class="mut">Two parts today: the 5-minute card game, then the final memory test.</p>`
+      :`<h2>Day ${day}</h2><p class="mut">Five minutes. Find pairs on Level 1, then Level 2. Each pair scores 10; each card you open costs 1.</p>`;
+    btn="Start today's session";fn=startGame}
+  else if(postDue){txt="<h2>One last test</h2><p class='mut'>The same memory test as at the start.</p>";btn="Start final test";fn=()=>digitTest("post")}
+  else{txt="<h2>See you tomorrow</h2><p class='mut'>Today's session is finished.</p>";btn=null}
+  $("homeTxt").innerHTML=txt;
+  $("homeBtn").classList.toggle("hide",!btn);
+  if(btn){$("homeBtn").textContent=btn;$("homeBtn").onclick=fn}
+  show("home");
+}
+$("loginBtn").onclick=async()=>{
+  const p=$("pid").value.trim().toUpperCase();if(!p)return;
+  $("loginMsg").textContent="";
+  let r=null;
+  if(ENDPOINT){
+    try{r=await query(p)}catch(e){$("loginMsg").textContent="Can't reach the server. Check your connection and try again.";return}
+    if(!r.ok){$("loginMsg").textContent="That ID isn't recognized. Check it and try again.";return}
+  }
+  if(st.pid!==p)st=Object.assign(st,{pid:p,group:P.get("g")||"",enrolled:"",pre:false,post:false,days:[]});
+  active=true;
+  if(r)applyServer(r);
+  if(!st.enrolled){st.enrolled=today();send("Participants",[st.enrolled])}
+  if(!TEST)send("Logins",[today()]);
+  save();route();
+};
+
+// ---------- digit span ----------
+function say(t){const e=$("dg");t=String(t);e.textContent=t;e.classList.toggle("sm",t.length>1);e.classList.remove("pulse");if(t){void e.offsetWidth;e.classList.add("pulse")}}
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+// Digits depend only on (participant ID, length): a repeat or the final test shows identical sequences.
+function makeSeq(n){const r=mulberry(hash(st.pid+"|"+n)),s=[];while(s.length<n){const d=Math.floor(r()*10);if(s[s.length-1]!==d)s.push(d)}return s}
+function ask(){
+  return new Promise(res=>{
+    $("askBox").classList.remove("hide");$("ans").value="";$("ans").focus();
+    const done=()=>{$("ansBtn").onclick=null;$("ans").onkeydown=null;$("askBox").classList.add("hide");res($("ans").value.replace(/\D/g,""))};
+    $("ansBtn").onclick=done;$("ans").onkeydown=e=>{if(e.key==="Enter")done()};
+  });
+}
+async function digitTest(phase){
+  show("digit");
+  // Ascend 3,5,7,... until the first failure at length L, then test L-1 once. Span = longest length passed.
+  let len=3,span=0,second=false;const trials=[];
+  while(true){
+    const seq=makeSeq(len);
+    say("Get ready");await sleep(1500);
+    for(const d of seq){say(d);await sleep(900);say("");await sleep(250)}
+    say("?");
+    const ans=await ask();
+    const c=ans===seq.join("");
+    trials.push({len,seq:seq.join(""),ans,c});
+    if(second){if(c)span=len;break}
+    if(c){span=len;if(len+2>MAX_LEN)break;len+=2}
+    else{second=true;len=len-1}
+  }
+  send("Digit",[phase,span,trials.length,JSON.stringify(trials)]);
+  st[phase]=true;save();say("");
+  route();
+}
+
+// ---------- memory game ----------
+const NUMS=Array.from({length:25},(_,i)=>String(i+1));   // pairs use numbers 1-25 (Level 1 uses 1-10)
+let S={};
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffle(arr,seed){const r=mulberry(seed);for(let i=arr.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+
+function startGame(){
+  S={levels:[],end:Date.now()+GAME_SECONDS*1000,ended:false};
+  show("game");S.timer=setInterval(tick,250);tick();startLevel(1);
+}
+function startLevel(n){
+  const N=n===1?20:50,seed=Math.floor(Math.random()*4294967295);
+  const deck=shuffle(NUMS.slice(0,N/2).flatMap(e=>[e,e]),seed);
+  S.L={level:n,seed,totalPairs:N/2,pairs:0,cardsOpened:0,score:0,first:null,lock:false,t0:Date.now(),done:false};
+  const g=$("grid");g.className="grid"+(n===2?" l2":"");g.innerHTML="";
+  deck.forEach(e=>{const b=document.createElement("button");b.className="c";b.dataset.e=e;b.setAttribute("aria-label","card");b.onclick=()=>flip(b);g.appendChild(b)});
+  $("lv").textContent="Level "+n;upd();
+}
+function upd(){$("sc").textContent="Score: "+(S.levels.reduce((a,l)=>a+l.score,0)+(S.L&&!S.L.done?S.L.score:0))}
+function tick(){
+  const r=Math.max(0,Math.ceil((S.end-Date.now())/1000));
+  $("tm").textContent=Math.floor(r/60)+":"+String(r%60).padStart(2,"0");
+  $("tfill").style.transform="scaleX("+(r/GAME_SECONDS)+")";
+  if(r<=0)finish();
+}
+function flip(b){
+  const L=S.L;
+  if(S.ended||L.lock||b.classList.contains("open")||b.classList.contains("done"))return;
+  b.classList.add("open");b.textContent=b.dataset.e;L.cardsOpened++;L.score--;
+  if(!L.first){L.first=b;upd();return}
+  const a=L.first;L.first=null;
+  if(a.dataset.e===b.dataset.e){
+    L.pairs++;L.score+=10;
+    setTimeout(()=>{a.classList.add("done");b.classList.add("done")},400);
+    if(L.pairs===L.totalPairs){L.lock=true;setTimeout(()=>{if(!S.ended)endLevel(true)},700)}
+  }else{
+    L.lock=true;
+    setTimeout(()=>{[a,b].forEach(x=>{x.classList.remove("open");x.textContent=""});L.lock=false},900);
+  }
+  upd();
+}
+function endLevel(done){
+  const L=S.L;if(L.done)return;L.done=true;
+  S.levels.push({pairs:L.pairs,cards:L.cardsOpened,score:L.score,done,secs:Math.round((Date.now()-L.t0)/1000),seed:L.seed});
+  if(done&&L.level===1)startLevel(2);else finish();
+}
+function finish(){
+  if(S.ended)return;S.ended=true;clearInterval(S.timer);
+  if(S.L&&!S.L.done){S.L.lock=true;endLevel(false)}
+  const [a,b]=S.levels,f=l=>l?[l.pairs,l.cards,l.score,l.done,l.secs,l.seed]:["","","","","",""];
+  const total=S.levels.reduce((x,l)=>x+l.score,0);
+  const day=dayNum();
+  if(!TEST){st.days.push(today());send("Game",[day,today(),...f(a),...f(b),total])}
+  const due=day>=POST_DAY&&!st.post;
+  $("homeTxt").innerHTML=`<h2>Session complete</h2><div class="score">${total}</div><p class="mut">total score</p>`+S.levels.map((l,i)=>`<p>Level ${i+1}: ${l.pairs} pairs found with ${l.cards} cards opened${l.done?"":", time ran out"}</p>`).join("")+(due?"":'<p class="mut">Come back tomorrow.</p>');
+  $("homeBtn").classList.toggle("hide",!due);
+  if(due){$("homeBtn").textContent="Continue to the final test";$("homeBtn").onclick=()=>digitTest("post")}
+  show("home");
+}
+
+route();
+</script>
+</body>
+</html>
